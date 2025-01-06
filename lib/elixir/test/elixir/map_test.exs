@@ -495,4 +495,31 @@ defmodule MapTest do
     struct = %:elixir_struct_from_erlang_module{}
     assert :elixir_struct_from_erlang_module.world(struct) == struct
   end
+
+  describe "map shorthand syntax" do
+    test "basic shorthand syntax" do
+      a = 1
+      b = 2
+      assert %{a, b} == %{a: 1, b: 2}
+    end
+
+    test "mixing shorthand and traditional syntax" do
+      a = 1
+      assert %{a, b: "other", c: 30} == %{a: 1, b: "other", c: 30}
+    end
+
+    test "with multiple variables" do
+      a = 1
+      b = 2
+      c = 3
+      d = 4
+      assert %{a, b, c, d} == %{a: 1, b: 2, c: 3, d: 4}
+    end
+
+    test "with nested maps" do
+      a = 1
+      inner = %{b: 100}
+      assert %{a, data: %{inner}} == %{a: 1, data: %{inner: %{b: 100}}}
+    end
+  end
 end

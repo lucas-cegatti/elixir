@@ -10,9 +10,21 @@ expand_map(Meta, [{'|', UpdateMeta, [Left, Right]}], S, #{context := nil} = E) -
 expand_map(Meta, [{'|', _, [_, _]}] = Args, _S, #{context := Context, file := File}) ->
   file_error(Meta, File, ?MODULE, {update_syntax_in_wrong_context, Context, {'%{}', Meta, Args}});
 expand_map(Meta, Args, S, E) ->
-  {EArgs, SE, EE} = elixir_expand:expand_args(Args, S, E),
+  {EArgs, SE, EE} = expand_map_args(Args, S, E),
   validate_kv(Meta, EArgs, Args, E),
   {{'%{}', Meta, EArgs}, SE, EE}.
+
+expand_map_args(Args, S, E) ->
+  {ExArgs, SE, EE} = elixir_expand:expand_args(Args, S, E),
+  {expand_shorthand(ExArgs), SE, EE}.
+
+expand_shorthand(Args) ->
+  lists:map(fun
+    ({Name, Meta, Context}) when is_atom(Name), is_atom(Context) ->
+      {Name, {Name, Meta, Context}};
+    (Other) -> 
+      Other
+  end, Args).
 
 expand_struct(Meta, Left, {'%{}', MapMeta, MapArgs}, S, #{context := Context} = E) ->
   CleanMapArgs = clean_struct_key_from_map_args(Meta, MapArgs, E),
